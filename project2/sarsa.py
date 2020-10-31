@@ -14,26 +14,22 @@ def update_model(sars_, Q, N):
     l = None
     for idx, row in sars_.iterrows():
         s, a, r, s_ = row['s']-1, row['a']-1, row['r']-1, row['sp']-1
-        if l != None:
+        if l != None and l[3] == s:
             N[l[0], l[1]] += 1
             delta = r + gamma * Q[s,a] - Q[l[0], l[1]]
-            for s__ in range(S):
-                for a__ in range(A):
-                    Q[s__][a__] += alpha * delta * N[s__,a__]
-                    N[s__][a__] *= gamma * lambda_
+            Q[s][a] += alpha * delta * N[s,a]
+            N[s][a] *= gamma * lambda_
         else:
             N[:,:] = 0
-        l = (s, a, r)
+        l = (s, a, r, s_)
     return Q, N
 
 
 def output_policy(Q, outfile):
     pi = np.argmax(Q, axis=-1)
-    with open(file_name, "w") as f:
-        for i, p in enumerate(P):
-            f.write(str(p+1))
-            if i != P.size - 1:
-                f.write("\n")
+    with open(outfile, "w") as f:
+        for p in pi:
+            f.write(str(p+1)+"\n")
 
 
 def compute(infile, outfile, k_max):
